@@ -1,0 +1,21 @@
+version: '3.0'
+services:
+  mapserver:
+    container_name: mapserver
+    build: mapserver
+    user: root
+    ports:
+      - 80:80
+    volumes:
+      # Format: host path : container path
+      - ${WORKING_DIR}:/srv/mapserver
+
+  mapproxy:
+    container_name: mapproxy
+    build: mapproxy
+    user: root
+    depends_on:
+      - mapserver
+    volumes:
+      # Format: host path : container path
+      - ${WORKING_DIR}/tiles:/mnt/tiles

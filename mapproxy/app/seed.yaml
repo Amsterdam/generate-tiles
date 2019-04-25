@@ -1,0 +1,20 @@
+seeds:
+  seed:
+    caches: [cache_28992]
+    grids: [grid_28992]
+    coverages:
+      - coverage_28992
+    levels:
+      from: 5
+      to: 16
+    refresh_before:
+      minutes: 1
+
+coverages:
+  coverage_28992:
+    bbox: [110099, 477249, 128100, 492251]
+    srs: 'EPSG:28992'
+
+  coverage_4326:
+    bbox: [4.72876, 52.2782, 5.07916, 52.4311]
+    srs: 'EPSG:4326'

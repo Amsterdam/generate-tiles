@@ -1,0 +1,18 @@
+{
+  "name": "seed",
+  "version": "0.0.1",
+  "description": "Script to run mapproxy-seed with argumentds",
+  "main": "seed.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "seed": "./seed.js"
+  },
+  "author": "Bert Spaan",
+  "license": "ISC",
+  "dependencies": {
+    "js-yaml": "^3.13.1",
+    "yargs": "^13.2.2"
+  }
+}
