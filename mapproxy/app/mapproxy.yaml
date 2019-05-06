@@ -38,6 +38,11 @@ sources:
     req:
       transparent: true
 
+layers:
+  - name: layer
+    title: Layer
+    sources: [source]
+
 grids:
   grid_28992:
     srs: EPSG:28992

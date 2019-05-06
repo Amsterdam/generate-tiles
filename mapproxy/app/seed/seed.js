@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs')
+const path = require('path')
 const util  = require('util')
 const spawn = require('child_process').spawn
 const yaml = require('js-yaml')
@@ -26,26 +27,29 @@ const argv = require('yargs')
   })
   .option('levels', {
     alias: 'e',
-    describe: 'min. and max. level of tiles, seperated by a dash (-)',
+    describe: 'min. and max. level of tiles, separated by a dash (-)',
     default: '5-16'
     // TODO: check if param contains -
   })
   .demandOption(['srs', 'map', 'layer'])
 .argv
 
-const bounds4326 = [4.72876, 52.2782, 5.07916, 52.4311]
-const bounds28992 = [110099, 477249, 128100, 492251]
+const BOUNDS_4326 = [4.72876, 52.2782, 5.07916, 52.4311]
+const BOUNDS_28992 = [110099, 477249, 128100, 492251]
 
-const srcMapProxyYaml = '/app/mapproxy.yaml'
-const srcSeedYaml = '/app/seed.yaml'
+const SRC_DIR = '/app'
+const DST_DIR = '/tmp'
 
-const dstMapProxyYaml = '/tmp/mapproxy.yaml'
-const dstSeedYaml = '/tmp/seed.yaml'
+const CONF_FILENAME = 'mapproxy.yaml'
+const SEED_FILENAME = 'seed.yaml'
 
-const mapProxyData = yaml.safeLoad(fs.readFileSync(srcMapProxyYaml, 'utf8'))
-const seedData = yaml.safeLoad(fs.readFileSync(srcSeedYaml, 'utf8'))
+const dstConfPath = path.join(DST_DIR, CONF_FILENAME)
+const dstSeedPath = path.join(DST_DIR, SEED_FILENAME)
 
-fs.writeFileSync(dstMapProxyYaml, yaml.safeDump({...mapProxyData, ...{
+const confData = yaml.safeLoad(fs.readFileSync(path.join(SRC_DIR, CONF_FILENAME), 'utf8'))
+const seedData = yaml.safeLoad(fs.readFileSync(path.join(SRC_DIR, SEED_FILENAME), 'utf8'))
+
+fs.writeFileSync(dstConfPath, yaml.safeDump({...confData, ...{
   sources: {
     source: {
       type: 'wms',
@@ -68,10 +72,10 @@ if (argv.bounds) {
     .split(',')
     .map((coordinate) => parseFloat(coordinate))
 } else {
-  bbox = argv.srs === 28992 ? bounds28992 : bounds4326
+  bbox = argv.srs === 28992 ? BOUNDS_28992 : BOUNDS_4326
 }
 
-fs.writeFileSync(dstSeedYaml, yaml.safeDump({...seedData, ...{
+fs.writeFileSync(dstSeedPath, yaml.safeDump({...seedData, ...{
   seeds: {
     seed: {
       caches: [`cache_${argv.srs}`],
@@ -97,10 +101,8 @@ fs.writeFileSync(dstSeedYaml, yaml.safeDump({...seedData, ...{
 const spawned = spawn('mapproxy-seed', [
   '-c',
   '1',
-  '-s',
-  '/tmp/seed.yaml',
-  '-f',
-  '/tmp/mapproxy.yaml',
+  `--proxy-conf=${dstConfPath}`,
+  `--seed-conf=${dstSeedPath}`,
   '--seed=seed'
 ])
 

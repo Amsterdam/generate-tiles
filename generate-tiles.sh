@@ -15,3 +15,4 @@ if [ ! $MAPFILES_COUNT != 0 ]; then
 fi
 
 docker-compose run mapproxy seed "${@:2}"
+docker-compose stop mapserver
