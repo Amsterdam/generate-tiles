@@ -19,13 +19,5 @@ MAP
     PROJECTION
       "init=epsg:4326"
     END
-
-    METADATA
-       "wms_srs"             "EPSG:4326"
-       "wms_name"            "ahn"
-       "wms_format"          "image/tiff"
-       "wms_server_version"  "1.1.1"
-    END
   END
-
 END
