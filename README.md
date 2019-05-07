@@ -7,8 +7,8 @@ Docker-based script to generate tiles using MapServer and MapProxy.
 __Prerequisites: Docker with Docker Compose.__
 
 1. Create a [MapServer Mapfile](https://www.mapserver.org/mapfile/) which contains a `LAYER` for the geospatial source file you want to generate tiles from;
-2. Run [`generate-tiles.sh`](generate-tiles.sh) and specify the directory which contains the Mapfile,m the name of the Mapfile and the name of the layer (and optionally, a projection, bounding box and zoom levels);
-3. MapServer and MapProxy are started, with the specified directory as working directory for both containers.
+2. Run [`generate-tiles.sh`](generate-tiles.sh) and specify the directory which contains the Mapfile, the name of the Mapfile and the name of the layer (and optionally, a projection, bounding box and zoom levels);
+3. MapServer and MapProxy are started, with the specified directory as working directory for both containers: MapServer creates a WMS from the specified Mapfile, MapProxy uses this WMS to seed a set of tiles using [`mapproxy-seed`](https://mapproxy.org/docs/nightly/seed.html).
 
 ## Example
 
