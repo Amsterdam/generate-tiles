@@ -25,6 +25,10 @@ const argv = require('yargs')
     describe: 'Comma-separated bounding box'
     // TODO: check if param contains 4 numbers
   })
+  .option('continue', {
+    alias: 'c',
+    type: 'boolean'
+  })
   .option('levels', {
     alias: 'e',
     describe: 'min. and max. level of tiles, separated by a dash (-)',
@@ -101,6 +105,7 @@ fs.writeFileSync(dstSeedPath, yaml.safeDump({...seedData, ...{
 const spawned = spawn('mapproxy-seed', [
   '-c',
   '1',
+  argv.continue ? '--continue' : '',
   `--proxy-conf=${dstConfPath}`,
   `--seed-conf=${dstSeedPath}`,
   '--seed=seed'
