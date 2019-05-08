@@ -2,7 +2,6 @@
 
 const fs = require('fs')
 const path = require('path')
-const util  = require('util')
 const spawn = require('child_process').spawn
 const yaml = require('js-yaml')
 const argv = require('yargs')
@@ -26,8 +25,12 @@ const argv = require('yargs')
     // TODO: check if param contains 4 numbers
   })
   .option('continue', {
-    alias: 'c',
     type: 'boolean'
+  })
+  .option('concurrency', {
+    alias: 'c',
+    type: 'number',
+    default: 6
   })
   .option('levels', {
     alias: 'e',
@@ -36,7 +39,7 @@ const argv = require('yargs')
     // TODO: check if param contains -
   })
   .demandOption(['srs', 'map', 'layer'])
-.argv
+  .argv
 
 const BOUNDS_4326 = [4.72876, 52.2782, 5.07916, 52.4311]
 const BOUNDS_28992 = [110099, 477249, 128100, 492251]
@@ -53,18 +56,21 @@ const dstSeedPath = path.join(DST_DIR, SEED_FILENAME)
 const confData = yaml.safeLoad(fs.readFileSync(path.join(SRC_DIR, CONF_FILENAME), 'utf8'))
 const seedData = yaml.safeLoad(fs.readFileSync(path.join(SRC_DIR, SEED_FILENAME), 'utf8'))
 
-fs.writeFileSync(dstConfPath, yaml.safeDump({...confData, ...{
-  sources: {
-    source: {
-      type: 'wms',
-      req: {
-        url: `http://mapserver/maps/${argv.map}`,
-        layers: argv.layer,
-        transparent: true
+fs.writeFileSync(dstConfPath, yaml.safeDump({
+  ...confData,
+  ...{
+    sources: {
+      source: {
+        type: 'wms',
+        req: {
+          url: `http://mapserver/maps/${argv.map}`,
+          layers: argv.layer,
+          transparent: true
+        }
       }
     }
   }
-}}), 'utf8')
+}), 'utf8')
 
 const levels = argv.levels
   .split('-')
@@ -79,32 +85,35 @@ if (argv.bounds) {
   bbox = argv.srs === 28992 ? BOUNDS_28992 : BOUNDS_4326
 }
 
-fs.writeFileSync(dstSeedPath, yaml.safeDump({...seedData, ...{
-  seeds: {
-    seed: {
-      caches: [`cache_${argv.srs}`],
-      grids: [`grid_${argv.srs}`],
-      coverages: ['coverage'],
-      levels: {
-        from: levels[0],
-        to: levels[1]
-      },
-      refresh_before: {
-        minutes: 1
+fs.writeFileSync(dstSeedPath, yaml.safeDump({
+  ...seedData,
+  ...{
+    seeds: {
+      seed: {
+        caches: [`cache_${argv.srs}`],
+        grids: [`grid_${argv.srs}`],
+        coverages: ['coverage'],
+        levels: {
+          from: levels[0],
+          to: levels[1]
+        },
+        refresh_before: {
+          minutes: 1
+        }
+      }
+    },
+    coverages: {
+      coverage: {
+        bbox,
+        srs: `EPSG:${argv.srs}`
       }
     }
-  },
-  coverages: {
-    coverage: {
-      bbox,
-      srs: `EPSG:${argv.srs}`
-    }
   }
-}}), 'utf8')
+}), 'utf8')
 
 const spawned = spawn('mapproxy-seed', [
   '-c',
-  '1',
+  Math.round(argv.concurrency),
   argv.continue ? '--continue' : '',
   `--proxy-conf=${dstConfPath}`,
   `--seed-conf=${dstSeedPath}`,
