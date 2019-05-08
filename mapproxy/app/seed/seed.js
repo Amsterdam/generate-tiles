@@ -112,9 +112,9 @@ fs.writeFileSync(dstSeedPath, yaml.safeDump({
 }), 'utf8')
 
 const spawned = spawn('mapproxy-seed', [
-  '-c',
-  Math.round(argv.concurrency),
+  `--concurrency=${Math.round(argv.concurrency)}`,
   argv.continue ? '--continue' : '',
+  '--progress-file=/mnt/tiles/mapproxy_seed_progress',
   `--proxy-conf=${dstConfPath}`,
   `--seed-conf=${dstSeedPath}`,
   '--seed=seed'
